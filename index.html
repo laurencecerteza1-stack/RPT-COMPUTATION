@@ -39,9 +39,9 @@
                 <label class="form-label">Date of Computation:</label>
                 <input type="text" class="form-control form-control-sm text-danger fw-bold" value="01/07/2026">
                 <label class="form-label mt-1">Lot Details:</label>
-                <input type="text" class="form-control form-control-sm" value="GPH0020180001">
+                <input type="text" id="lotDetails" class="form-control form-control-sm" value="GPH0020180001">
                 <label class="form-label mt-1">Prepared By:</label>
-                <input type="text" class="form-control form-control-sm" value="Laurence">
+                <input type="text" id="preparedBy" class="form-control form-control-sm" value="Laurence">
                 <label class="form-label mt-1">Full Payment:</label>
                 <input type="text" class="form-control form-control-sm">
             </div>
@@ -257,7 +257,6 @@ function calcWithOR(el) {
             return;
         }
 
-        // QUARTER SWITCH ON DAY 21
         let qNum = 1;
         if ((inputMonth === 3 && inputDay >= 21) || inputMonth > 3) qNum = 2;
         if ((inputMonth === 6 && inputDay >= 21) || inputMonth > 6) qNum = 3;
@@ -272,7 +271,7 @@ function calcWithOR(el) {
         }
 
         let baseValue = (2025 - inputYear) + 1 - qFrac;
-        if (baseValue > 5) baseValue = 5.00; // Cap at 5 years / 180%
+        if (baseValue > 5) baseValue = 5.00;
 
         const annum = amount * 0.36;
         const penalty = annum * baseValue;
@@ -322,9 +321,21 @@ function updateGrandTotal() {
 
 function downloadPDF() {
     const element = document.getElementById('printable-area');
+    
+    // Dynamically get details from the form
+    const lotDetails = document.getElementById('lotDetails').value || "No-Lot";
+    const preparedBy = document.getElementById('preparedBy').value || "Staff";
+    
+    // Get current date in YYYY-MM-DD format
+    const today = new Date();
+    const dateString = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
+    // Combine into a filename and remove invalid characters
+    const fileName = `${lotDetails}_${dateString}_PreparedBy_${preparedBy}.pdf`.replace(/[/\\?%*:|"<>]/g, '-');
+
     const opt = {
         margin: 0.2,
-        filename: 'Tax_Computation_2026.pdf',
+        filename: fileName,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
